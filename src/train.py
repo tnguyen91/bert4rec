@@ -24,3 +24,4 @@ def fit(model, item_vocab_size, train_loader, epochs, learning_rate, device='cpu
 
         avg_loss = running_loss / len(train_loader.dataset)
         print(f"Epoch {epoch} | Train Loss: {avg_loss:.4f}")
+
