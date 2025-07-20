@@ -33,3 +33,29 @@ def load_dataset(data_dir: str = "./data") -> Tuple[pd.DataFrame, pd.DataFrame]:
         raise ValueError(f"Failed to load CSVs: {e}")
 
     return filter_hentai(ratings, anime)
+
+def preprocess_data(ratings_df, min_score=7, min_completed=20, max_completed=1000):
+    df = ratings_df.copy()
+    df = df[(df['status'] == 'Completed') & (df['score'] >= min_score)]
+
+    df = df.dropna(subset=['user_id'])
+
+
+    user_counts = df['user_id'].value_counts()
+    valid_users = user_counts[
+        (user_counts >= min_completed) & (user_counts <= max_completed)
+    ].index
+    df = df[df['user_id'].isin(valid_users)]
+
+    df = df.sort_values(['user_id'])
+    return df
+
+def train_test_split_sequences(user_sequences, n_test=1):
+    train_sequences = []
+    test_data = []
+    for user_idx, seq in enumerate(user_sequences):
+        train_seq = seq[:-n_test]
+        test_items = seq[-n_test:]
+        train_sequences.append(train_seq)
+        test_data.append((user_idx, train_seq, test_items))
+    return train_sequences, test_data

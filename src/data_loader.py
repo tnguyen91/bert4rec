@@ -3,14 +3,13 @@ from torch.utils.data import Dataset
 import random
 
 class BERT4RecDataset(Dataset):
-    def __init__(self, user_sequences, max_seq_len, mask_prob=0.15, seed=42):
+    def __init__(self, user_sequences, max_seq_len, mask_prob=0.15, item_vocab_size=None, seed=42):
         self.user_sequences = user_sequences
         self.max_seq_len = max_seq_len
         self.mask_prob = mask_prob
-
-        self.pad_token = 0
-        self.mask_token = 1
-
+        self.item_vocab_size = item_vocab_size
+        self.mask_token = item_vocab_size
+        self.pad_token = item_vocab_size + 1
         random.seed(seed)
 
     def __len__(self):
@@ -21,7 +20,6 @@ class BERT4RecDataset(Dataset):
         seq = seq[-self.max_seq_len:]
         padding = [self.pad_token] * (self.max_seq_len - len(seq))
         seq = padding + seq
-
         masked_seq = []
         labels = []
         for item in seq:
@@ -31,5 +29,4 @@ class BERT4RecDataset(Dataset):
             else:
                 masked_seq.append(item)
                 labels.append(-100)
-
         return torch.LongTensor(masked_seq), torch.LongTensor(labels)
